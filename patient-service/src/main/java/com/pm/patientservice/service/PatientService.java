@@ -55,7 +55,7 @@ public class PatientService {
 
     public PatientResponseDTO updatePatient(UUID id, PatientRequestDTO dto) {
        Patient patient = patientRepository.findById(id).orElseThrow(() -> new PatientNotFoundException("Patient id not found " + id));
-        var checkEmail = patientRepository.existsByEmail(dto.getEmail());
+        var checkEmail = patientRepository.existsByEmailAndIdNot(dto.getEmail(), id);
         if(checkEmail) {
             log.info("method :: Email already exists");
             throw new EmailAlreadyExistsException("A patient with this email " + dto.getEmail() + " already exists.");
@@ -65,5 +65,13 @@ public class PatientService {
         PatientMapper.toUpdatePatientModel(dto, patient);
         Patient updatedData = patientRepository.save(patient);
         return PatientMapper.patientToPatientResponseDTO(updatedData);
+    }
+    public boolean deletePatient(UUID id) {
+        try{
+            patientRepository.deleteById(id);
+            return true;
+        }catch (Exception e) {
+            return false;
+        }
     }
 }
